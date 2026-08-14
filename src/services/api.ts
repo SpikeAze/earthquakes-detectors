@@ -30,8 +30,7 @@ export async function fetchEarthquakes(
 
   const response = await fetch(`${BASE_URL}?${params.toString()}`);
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`USGS API error ${response.status}: ${text.slice(0, 200)}`);
+    throw new Error(`USGS API error ${response.status}`);
   }
   return response.json() as Promise<USGSResponse>;
 }
@@ -43,7 +42,12 @@ export async function geocodeCity(
   const params = new URLSearchParams({ q: query, format: 'json', limit: '1' });
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-    { headers: { 'Accept-Language': 'en' } }
+    {
+      headers: {
+        'Accept-Language': 'en',
+        'User-Agent': 'SeismoScope/1.0 (earthquake monitoring app)',
+      },
+    },
   );
   if (!response.ok) return null;
   const data = await response.json();

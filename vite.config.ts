@@ -8,4 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    allowedHosts: process.env.ALLOWED_HOSTS?.split(',') || [],
+  }
 })

@@ -126,6 +126,18 @@ export function getDepthLabel(km: number): string {
   return 'Deep';
 }
 
+// ─── CSV sanitization ────────────────────────────────────────────────────────
+const FORMULA_CHARS = ['=', '+', '-', '@', '\t', '\r', '\n'];
+
+function sanitizeCsvField(field: string | number): string {
+  const str = String(field);
+  // Prefix with a single quote to neutralize formula injection attempts
+  if (FORMULA_CHARS.some((c) => str.startsWith(c))) {
+    return `'${str}`;
+  }
+  return str;
+}
+
 // ─── CSV export ─────────────────────────────────────────────────────────────
 export function exportToCSV(earthquakes: ProcessedEarthquake[]): void {
   const headers = [
@@ -134,10 +146,20 @@ export function exportToCSV(earthquakes: ProcessedEarthquake[]): void {
     'Time (UTC)', 'Felt', 'Alert', 'Tsunami', 'URL',
   ];
   const rows = earthquakes.map((eq) => [
-    eq.id, `"${eq.title}"`, eq.magnitude, eq.category, `"${eq.place}"`,
-    eq.latitude, eq.longitude, eq.depth.toFixed(1), eq.depthMiles.toFixed(1),
-    formatDateTimeISO(eq.time), eq.felt ?? '', eq.alert ?? '',
-    eq.tsunami ? 'Yes' : 'No', eq.url,
+    sanitizeCsvField(eq.id),
+    sanitizeCsvField(eq.title),
+    eq.magnitude,
+    sanitizeCsvField(eq.category),
+    sanitizeCsvField(eq.place),
+    eq.latitude,
+    eq.longitude,
+    eq.depth.toFixed(1),
+    eq.depthMiles.toFixed(1),
+    sanitizeCsvField(formatDateTimeISO(eq.time)),
+    eq.felt ?? '',
+    eq.alert ?? '',
+    eq.tsunami ? 'Yes' : 'No',
+    sanitizeCsvField(eq.url),
   ]);
   const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });

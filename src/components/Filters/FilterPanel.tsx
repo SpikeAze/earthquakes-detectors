@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEarthquakeStore } from '../../store/earthquakeStore';
 import { geocodeCity } from '../../services/api';
 import { daysAgoDateString, todayDateString } from '../../utils/helpers';
+import type { ViewMode } from '../../types/earthquake';
 import { Search, MapPin, X, Loader2, Sliders, RotateCcw } from 'lucide-react';
 
 export default function FilterPanel() {
@@ -17,23 +18,37 @@ export default function FilterPanel() {
 
   const [cityQuery, setCityQuery] = useState('');
   const [geocoding, setGeocoding] = useState(false);
+  const geocodeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleGeocode = async () => {
-    if (!cityQuery.trim()) return;
+  useEffect(() => {
+    return () => {
+      if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
+    };
+  }, []);
+
+  const performGeocode = async (query: string) => {
     setGeocoding(true);
     try {
-      const result = await geocodeCity(cityQuery.trim());
+      const result = await geocodeCity(query);
       if (!result) {
         addToast('Location not found. Try a different city name.', 'error');
       } else {
         setLocation({ name: result.displayName, latitude: result.lat, longitude: result.lon });
-        addToast(`📍 Searching near ${cityQuery}`, 'success');
+        addToast(`📍 Searching near ${query}`, 'success');
       }
     } catch {
       addToast('Geocoding failed. Try again.', 'error');
     } finally {
       setGeocoding(false);
     }
+  };
+
+  const handleGeocode = () => {
+    if (!cityQuery.trim()) return;
+    if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
+    geocodeTimeoutRef.current = setTimeout(() => {
+      performGeocode(cityQuery.trim());
+    }, 800);
   };
 
   const handleApply = () => {
@@ -128,11 +143,11 @@ export default function FilterPanel() {
         {location.latitude !== null && (
           <div style={{ marginTop: 8 }}>
             <Label>Radius: {location.radiusKm} km</Label>
-            <input
-              type="range" min={100} max={5000} step={100}
-              value={location.radiusKm}
-              onChange={(e) => setLocation({ radiusKm: Number(e.target.value) })}
-            />
+          <input
+            type="range" min={100} max={5000} step={100}
+            value={location.radiusKm}
+            onChange={(e) => setLocation({ radiusKm: Math.max(100, Math.min(5000, Number(e.target.value) || 100)) })}
+          />
           </div>
         )}
       </div>
@@ -171,18 +186,26 @@ export default function FilterPanel() {
           <div>
             <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', marginBottom: 3 }}>Min</div>
             <input
-              type="range" min={0} max={9} step={0.1}
-              value={filters.minMagnitude}
-              onChange={(e) => setFilters({ minMagnitude: Number(e.target.value) })}
-            />
+               type="range" min={0} max={9} step={0.1}
+               value={filters.minMagnitude}
+               onChange={(e) => {
+                 const val = Number(e.target.value);
+                 const clamped = Math.max(0, Math.min(val, filters.maxMagnitude - 0.1));
+                 setFilters({ minMagnitude: Math.min(clamped, 9) });
+               }}
+             />
           </div>
           <div>
             <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', marginBottom: 3 }}>Max</div>
             <input
-              type="range" min={1} max={10} step={0.1}
-              value={filters.maxMagnitude}
-              onChange={(e) => setFilters({ maxMagnitude: Number(e.target.value) })}
-            />
+               type="range" min={1} max={10} step={0.1}
+               value={filters.maxMagnitude}
+               onChange={(e) => {
+                 const val = Number(e.target.value);
+                 const clamped = Math.max(val, filters.minMagnitude + 0.1);
+                 setFilters({ maxMagnitude: Math.min(Math.max(clamped, 1), 10) });
+               }}
+             />
           </div>
         </div>
       </div>
@@ -196,18 +219,26 @@ export default function FilterPanel() {
           <div>
             <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', marginBottom: 3 }}>Min (km)</div>
             <input
-              type="range" min={0} max={600} step={10}
-              value={filters.minDepth}
-              onChange={(e) => setFilters({ minDepth: Number(e.target.value) })}
-            />
+               type="range" min={0} max={600} step={10}
+               value={filters.minDepth}
+               onChange={(e) => {
+                 const val = Number(e.target.value);
+                 const clamped = Math.max(0, Math.min(val, filters.maxDepth - 10));
+                 setFilters({ minDepth: Math.min(clamped, 600) });
+               }}
+             />
           </div>
           <div>
             <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', marginBottom: 3 }}>Max (km)</div>
             <input
-              type="range" min={10} max={700} step={10}
-              value={filters.maxDepth}
-              onChange={(e) => setFilters({ maxDepth: Number(e.target.value) })}
-            />
+               type="range" min={10} max={700} step={10}
+               value={filters.maxDepth}
+               onChange={(e) => {
+                 const val = Number(e.target.value);
+                 const clamped = Math.max(val, filters.minDepth + 10);
+                 setFilters({ maxDepth: Math.min(Math.max(clamped, 10), 700) });
+               }}
+             />
           </div>
         </div>
       </div>
@@ -220,7 +251,7 @@ export default function FilterPanel() {
           <Label>Sort By</Label>
           <select
             value={filters.orderBy}
-            onChange={(e) => setFilters({ orderBy: e.target.value as any })}
+            onChange={(e) => setFilters({ orderBy: e.target.value as ViewMode })}
             className="glass-input"
             style={{ colorScheme: 'dark' }}
           >
@@ -231,11 +262,11 @@ export default function FilterPanel() {
         </div>
         <div>
           <Label>Limit: {filters.limit}</Label>
-          <input
-            type="range" min={10} max={500} step={10}
-            value={filters.limit}
-            onChange={(e) => setFilters({ limit: Number(e.target.value) })}
-          />
+           <input
+             type="range" min={10} max={500} step={10}
+             value={filters.limit}
+             onChange={(e) => setFilters({ limit: Math.max(10, Math.min(500, Number(e.target.value) || 10)) })}
+           />
         </div>
       </div>
 
@@ -244,11 +275,11 @@ export default function FilterPanel() {
       {/* Alert threshold */}
       <div>
         <Label>Alert Threshold: M{alertThreshold.toFixed(1)}+</Label>
-        <input
-          type="range" min={1} max={9} step={0.5}
-          value={alertThreshold}
-          onChange={(e) => setAlertThreshold(Number(e.target.value))}
-        />
+         <input
+           type="range" min={1} max={9} step={0.5}
+           value={alertThreshold}
+           onChange={(e) => setAlertThreshold(Math.max(1, Math.min(9, Number(e.target.value) || 5)))}
+         />
         <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 3 }}>
           Notify when new earthquakes ≥ M{alertThreshold.toFixed(1)} appear
         </div>
