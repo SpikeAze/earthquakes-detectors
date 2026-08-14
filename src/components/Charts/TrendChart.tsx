@@ -83,7 +83,7 @@ export default function TrendChart() {
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip
               contentStyle={tooltipStyle}
-               formatter={(value: number, name: string) => [value, name === 'count' ? 'Events' : name]}
+               formatter={(value: unknown, name: string | number | undefined) => [typeof value === 'number' ? value : 0, name === 'count' ? 'Events' : String(name ?? 'Value')]}
               labelFormatter={(l) => `Date: ${l}`}
             />
             <Bar dataKey="count" radius={[3, 3, 0, 0]}>
@@ -106,7 +106,7 @@ export default function TrendChart() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="dateShort" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
             <YAxis tick={{ fontSize: 10 }} domain={[0, 'auto']} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => Number(v).toFixed(2)} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: unknown) => (typeof v === 'number' ? v : 0).toFixed(2)} />
             <Legend wrapperStyle={{ fontSize: '0.72rem' }} />
             <Line type="monotone" dataKey="maxMag" stroke="#ef4444" strokeWidth={2} dot={false} name="Max Mag" />
             <Line type="monotone" dataKey="avgMag" stroke="#4f8ef7" strokeWidth={2} dot={false} name="Avg Mag" strokeDasharray="4 2" />
@@ -125,7 +125,7 @@ export default function TrendChart() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="range" tick={{ fontSize: 10 }} />
             <YAxis tick={{ fontSize: 10 }} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [v, 'Events']} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: unknown) => [typeof v === 'number' ? v : 0, 'Events']} />
             <Bar dataKey="count" radius={[3, 3, 0, 0]}>
               {magDistribution.map((_, idx) => {
                 const mids = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5];

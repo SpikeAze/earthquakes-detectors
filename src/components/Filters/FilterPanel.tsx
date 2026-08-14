@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useEarthquakeStore } from '../../store/earthquakeStore';
 import { geocodeCity } from '../../services/api';
 import { daysAgoDateString, todayDateString } from '../../utils/helpers';
-import type { ViewMode } from '../../types/earthquake';
+import type { FilterState } from '../../types/earthquake';
 import { Search, MapPin, X, Loader2, Sliders, RotateCcw } from 'lucide-react';
 
 export default function FilterPanel() {
@@ -251,7 +251,7 @@ export default function FilterPanel() {
           <Label>Sort By</Label>
           <select
             value={filters.orderBy}
-            onChange={(e) => setFilters({ orderBy: e.target.value as ViewMode })}
+            onChange={(e) => setFilters({ orderBy: e.target.value as FilterState['orderBy'] })}
             className="glass-input"
             style={{ colorScheme: 'dark' }}
           >
