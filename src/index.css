@@ -331,9 +331,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .leaflet-control-attribution {
-  background: rgba(10,14,26,0.8) !important;
-  color: var(--text-muted) !important;
-  font-size: 10px !important;
+  display: none !important;
 }
 
 .leaflet-control-attribution a {
@@ -446,4 +444,103 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 .tsunami-badge {
   animation: blink 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   RESPONSIVE LAYOUT UTILITIES
+   Breakpoints:
+     - Mobile   : < 768px  (phones)
+     - Tablet   : 768px – 1024px
+     - Desktop  : > 1024px (full 3-column layout)
+   ============================================================ */
+
+/* Hide desktop-only elements on small screens */
+.nav-status-badges { display: flex; }
+.nav-brand-sub     { display: block; }
+.trend-stats-4col  { grid-template-columns: repeat(4, 1fr); }
+.modal-grid-3col   { grid-template-columns: repeat(3, 1fr); }
+
+/* Tablet (768px – 1024px): feed becomes an overlay drawer */
+@media (max-width: 1024px) {
+  .feed-toggle-btn     { display: none !important; }
+  .trend-stats-4col    { grid-template-columns: repeat(2, 1fr); }
+
+  /* Filter and Feed render as fixed overlays instead of flex siblings */
+  .aside-overlay {
+    position: fixed;
+    top: 56px;
+    bottom: 0;
+    width: 320px;
+    max-width: 85vw;
+    z-index: 200;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .aside-overlay-filter { left: 0; }
+  .aside-overlay-feed   { right: 0; }
+}
+
+/* Mobile (< 768px): single-column, drawers + compact navbar */
+@media (max-width: 768px) {
+  .trend-stats-4col  { grid-template-columns: 1fr 1fr; }
+  .modal-grid-3col   { grid-template-columns: 1fr 1fr; }
+
+  .nav-status-badges { display: none; }
+  .nav-brand-sub     { display: none; }
+
+  .aside-overlay {
+    top: 48px;
+    width: 300px;
+    max-width: 90vw;
+  }
+
+  /* Charts stack responsive cards */
+  .trend-mag-grid   { grid-template-columns: 1fr; }
+}
+
+/* Very small phones (< 420px): single-column stats */
+@media (max-width: 420px) {
+  .trend-stats-4col  { grid-template-columns: 1fr; }
+  .modal-grid-3col   { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== RESPONSIVE GRID HELPERS (used alongside inline styles) ===== */
+.feed-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.modal-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .modal-metrics-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 420px) {
+  .modal-metrics-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== RESPONSIVE NAVBAR ===== */
+@media (max-width: 1024px) {
+  .nav-refresh span,
+  .nav-export { display: none; }
+  .nav-refresh { padding: 6px 10px !important; }
+}
+
+/* Compact navbar on phones */
+@media (max-width: 768px) {
+  header { height: 48px !important; padding: 0 10px !important; gap: 8px !important; }
+  .nav-tab-label { display: none; }
+  .nav-refresh { padding: 5px 8px !important; }
+  header .btn-primary,
+  header .btn-icon { padding: 5px !important; }
+}
+
+/* Very small phones: strip to essentials */
+@media (max-width: 480px) {
+  header .btn-primary { display: none; }
+  .nav-brand-sub { display: none; }
+  .nav-brand-name { display: none; }
+  .nav-export { display: none; }
 }

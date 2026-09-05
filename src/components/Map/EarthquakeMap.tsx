@@ -24,6 +24,21 @@ function MapController() {
   return null;
 }
 
+function MapResizer() {
+  const map = useMap();
+  const feedOpen = useEarthquakeStore((s) => s.feedOpen);
+  const filterPanelOpen = useEarthquakeStore((s) => s.filterPanelOpen);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [map, feedOpen, filterPanelOpen]);
+
+  return null;
+}
+
 // ─── Main Map Component ───────────────────────────────────────────────────────
 export default function EarthquakeMap() {
   const earthquakes = useEarthquakeStore((s) => s.earthquakes);
@@ -38,14 +53,16 @@ export default function EarthquakeMap() {
         style={{ width: '100%', height: '100%' }}
         zoomControl={true}
         worldCopyJump={true}
+        attributionControl={false}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a> | Data: <a href="https://earthquake.usgs.gov">USGS</a>'
-          maxZoom={19}
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          attribution='&copy; Esri &mdash; Esri, DeLorme, NAVTEQ | Data: <a href="https://earthquake.usgs.gov">USGS</a>'
+          maxZoom={16}
         />
 
         <MapController />
+        <MapResizer />
 
         {earthquakes.map((eq) => {
           const color = getMagnitudeColor(eq.magnitude);
@@ -66,7 +83,6 @@ export default function EarthquakeMap() {
                 weight: isSelected ? 2 : 1,
               }}
               eventHandlers={{
-                click: () => setSelectedEarthquake(eq),
                 mouseover: (e) => { e.target.setStyle({ fillOpacity: 1 }); },
                 mouseout: (e) => { e.target.setStyle({ fillOpacity: isSelected ? 0.95 : 0.75 }); },
               }}

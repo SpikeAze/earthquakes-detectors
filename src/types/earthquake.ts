@@ -93,7 +93,7 @@ export interface FilterState {
   startDate: string;
   endDate: string;
   limit: number;
-  orderBy: 'time' | 'magnitude' | 'time-asc';
+  orderBy: 'time' | 'magnitude' | 'time-asc' | 'magnitude-asc';
 }
 
 // Location search

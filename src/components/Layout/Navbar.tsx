@@ -3,7 +3,7 @@ import { exportToCSV } from '../../utils/helpers';
 import type { ViewMode } from '../../types/earthquake';
 import {
   Activity, Map, List, BarChart2, Sliders,
-  Download, RefreshCw, Loader2, Waves, Zap,
+  Download, RefreshCw, Loader2, Waves, Zap, ListFilter,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -11,6 +11,8 @@ export default function Navbar() {
   const setViewMode       = useEarthquakeStore((s) => s.setViewMode);
   const filterPanelOpen   = useEarthquakeStore((s) => s.filterPanelOpen);
   const toggleFilter      = useEarthquakeStore((s) => s.toggleFilterPanel);
+  const feedOpen          = useEarthquakeStore((s) => s.feedOpen);
+  const toggleFeed        = useEarthquakeStore((s) => s.toggleFeed);
   const fetchData         = useEarthquakeStore((s) => s.fetchData);
   const isLoading         = useEarthquakeStore((s) => s.isLoading);
   const earthquakes       = useEarthquakeStore((s) => s.earthquakes);
@@ -33,6 +35,16 @@ export default function Navbar() {
       display: 'flex', alignItems: 'center',
       padding: '0 16px', gap: 12, flexShrink: 0, zIndex: 100,
     }}>
+      {/* Feed toggle (hamburger) — visible on mobile/tablet */}
+      <button
+        onClick={toggleFeed}
+        className={`btn-icon feed-toggle-btn ${feedOpen ? 'active' : ''}`}
+        title="Toggle feed"
+        style={{ flexShrink: 0 }}
+      >
+        <ListFilter size={15} />
+      </button>
+
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8 }}>
         <div style={{
@@ -44,17 +56,17 @@ export default function Navbar() {
           <Activity size={16} style={{ color: 'white' }} />
         </div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.3px' }}>
+          <div className="nav-brand-name" style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.3px' }}>
             SeismoScope
           </div>
-          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+          <div className="nav-brand-sub" style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
             USGS · REAL-TIME
           </div>
         </div>
       </div>
 
-      {/* Status indicators */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 'auto' }}>
+      {/* Status indicators — hidden on mobile */}
+      <div className="nav-status-badges" style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 8px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 20 }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e', animation: 'pulse-dot 2s ease-in-out infinite' }} />
           <span style={{ fontSize: '0.68rem', color: '#4ade80', fontWeight: 600 }}>LIVE</span>
@@ -80,7 +92,7 @@ export default function Navbar() {
       </div>
 
       {/* View tabs */}
-      <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: 2 }}>
+      <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: 2, marginLeft: 'auto' }}>
         {views.map(({ key, icon, label }) => (
           <button
             key={key}
@@ -95,7 +107,7 @@ export default function Navbar() {
               transition: 'all 0.15s',
             }}
           >
-            {icon} {label}
+            {icon} <span className="nav-tab-label">{label}</span>
           </button>
         ))}
       </div>
@@ -111,7 +123,7 @@ export default function Navbar() {
         </button>
         <button
           onClick={() => exportToCSV(earthquakes)}
-          className="btn-icon"
+          className="btn-icon nav-export"
           title="Export CSV"
           disabled={earthquakes.length === 0}
         >
@@ -120,12 +132,12 @@ export default function Navbar() {
         <button
           onClick={fetchData}
           disabled={isLoading}
-          className="btn-primary"
+          className="btn-primary nav-refresh"
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: '0.8rem' }}
         >
           {isLoading
-            ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Loading…</>
-            : <><RefreshCw size={14} /> Refresh</>
+            ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></>
+            : <><RefreshCw size={14} /></>
           }
         </button>
       </div>

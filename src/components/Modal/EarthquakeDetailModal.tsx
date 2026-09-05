@@ -97,7 +97,7 @@ export default function EarthquakeDetailModal() {
         <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
           {/* Grid metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <div className="modal-metrics-grid" style={{ display:'grid' }}>
             {([
               { label: 'Latitude',   value: `${eq.latitude.toFixed(4)}°`,    icon: <Globe size={13} /> },
               { label: 'Longitude',  value: `${eq.longitude.toFixed(4)}°`,   icon: <Globe size={13} /> },

@@ -79,6 +79,9 @@ export default function App() {
   const fetchData       = useEarthquakeStore((s) => s.fetchData);
   const viewMode        = useEarthquakeStore((s) => s.viewMode);
   const filterPanelOpen = useEarthquakeStore((s) => s.filterPanelOpen);
+  const feedOpen        = useEarthquakeStore((s) => s.feedOpen);
+  const toggleFeed      = useEarthquakeStore((s) => s.toggleFeed);
+  const toggleFilter    = useEarthquakeStore((s) => s.toggleFilterPanel);
   const selectedEq      = useEarthquakeStore((s) => s.selectedEarthquake);
 
   // Initial fetch + auto-refresh every 5 minutes
@@ -89,17 +92,17 @@ export default function App() {
   }, [fetchData]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <Navbar />
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div className="app-body" style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
 
         {/* Filter Sidebar */}
         <div
+          className={`app-filter ${filterPanelOpen ? '' : 'app-filter-closed'}`}
           style={{
-            width: filterPanelOpen ? 280 : 0,
             overflow: 'hidden',
-            transition: 'width 0.25s ease',
+            transition: 'width 0.25s ease, transform 0.25s ease',
             borderRight: filterPanelOpen ? '1px solid var(--border-glass)' : 'none',
             background: 'var(--bg-secondary)',
             flexShrink: 0,
@@ -109,12 +112,27 @@ export default function App() {
         </div>
 
         {/* Feed sidebar */}
-        <div style={{ width: 320, flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div
+          className={`app-feed ${feedOpen ? 'app-feed-open' : 'app-feed-closed'}`}
+          style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.25s ease, transform 0.25s ease', background: 'var(--bg-primary)' }}
+        >
           <EarthquakeFeed />
         </div>
 
+        {/* Backdrop for mobile overlays */}
+        {(feedOpen || filterPanelOpen) && (
+          <div
+            className="app-backdrop"
+            onClick={() => { if (feedOpen) toggleFeed(); if (filterPanelOpen) toggleFilter(); }}
+            style={{
+              position: 'fixed', inset: 0, top: 56, zIndex: 190,
+              background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)',
+            }}
+          />
+        )}
+
         {/* Main content area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+        <div className="app-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
           {viewMode === 'map' && (
             <div style={{ flex: 1, padding: 12 }}>
               <Suspense fallback={
@@ -144,9 +162,9 @@ export default function App() {
             position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)',
             fontSize: '0.65rem', color: 'var(--text-muted)',
             background: 'rgba(10,14,26,0.8)', padding: '3px 10px', borderRadius: 12,
-            backdropFilter: 'blur(10px)', pointerEvents: 'none',
+            backdropFilter: 'blur(10px)', pointerEvents: 'none', whiteSpace: 'nowrap',
           }}>
-            Data from <strong style={{ color: 'var(--accent-blue)' }}>USGS Earthquake Hazards Program</strong> · earthquake.usgs.gov
+            Data from <strong style={{ color: 'var(--accent-blue)' }}>USGS Earthquake Hazards Program</strong>
           </div>
         </div>
       </div>
@@ -163,6 +181,47 @@ export default function App() {
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.4; }
+        }
+
+        /* Desktop: keep as flex siblings */
+        @media (min-width: 1025px) {
+          .app-filter { width: 280px; position: relative !important; }
+          .app-filter-closed { width: 0 !important; border: none !important; }
+          .app-feed   { width: 320px; position: relative !important; transform: none !important; box-shadow: none !important; border-left: 1px solid var(--border-glass); }
+          .app-feed-closed { width: 0 !important; border: none !important; }
+          .app-backdrop { display: none; }
+        }
+
+        /* Tablet & mobile: filter and feed become off-canvas overlays */
+        @media (max-width: 1024px) {
+          .app-filter {
+            position: fixed !important;
+            top: 56px; bottom: 0; left: 0;
+            z-index: 210;
+            width: 280px !important;
+            transform: translateX(0);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+          }
+          .app-filter-closed {
+            transform: translateX(-110%) !important;
+          }
+          .app-feed {
+            position: fixed !important;
+            top: 56px; bottom: 0; right: 0;
+            z-index: 210;
+            width: 320px !important;
+            max-width: 88vw;
+            transform: translateX(0);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+          }
+          .app-feed-closed {
+            transform: translateX(110%) !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .app-filter, .app-feed { top: 48px !important; }
+          .app-backdrop { top: 48px !important; }
         }
       `}</style>
     </div>

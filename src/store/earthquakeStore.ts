@@ -20,6 +20,7 @@ interface EarthquakeStore {
   location: LocationState;
   viewMode: ViewMode;
   sidebarOpen: boolean;
+  feedOpen: boolean;
   filterPanelOpen: boolean;
   toasts: Toast[];
   alertThreshold: number;
@@ -29,6 +30,7 @@ interface EarthquakeStore {
   setSelectedEarthquake: (eq: ProcessedEarthquake | null) => void;
   setViewMode: (mode: ViewMode) => void;
   toggleSidebar: () => void;
+  toggleFeed: () => void;
   toggleFilterPanel: () => void;
   fetchData: () => Promise<void>;
   setAlertThreshold: (v: number) => void;
@@ -66,6 +68,7 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
   location: defaultLocation,
   viewMode: 'map',
   sidebarOpen: true,
+  feedOpen: false,
   filterPanelOpen: false,
   toasts: [],
   alertThreshold: 5.0,
@@ -84,7 +87,11 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
 
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 
-  toggleFilterPanel: () => set((state) => ({ filterPanelOpen: !state.filterPanelOpen })),
+  toggleFeed: () =>
+    set((state) => ({ feedOpen: !state.feedOpen, filterPanelOpen: state.feedOpen ? state.filterPanelOpen : false })),
+
+  toggleFilterPanel: () =>
+    set((state) => ({ filterPanelOpen: !state.filterPanelOpen, feedOpen: state.filterPanelOpen ? state.feedOpen : false })),
 
   setAlertThreshold: (v) => set({ alertThreshold: v }),
 

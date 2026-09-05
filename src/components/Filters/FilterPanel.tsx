@@ -257,7 +257,8 @@ export default function FilterPanel() {
           >
             <option value="time">Newest First</option>
             <option value="time-asc">Oldest First</option>
-            <option value="magnitude">Magnitude</option>
+            <option value="magnitude">Highest Magnitude</option>
+            <option value="magnitude-asc">Lowest Magnitude</option>
           </select>
         </div>
         <div>

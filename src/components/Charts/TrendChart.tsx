@@ -137,7 +137,7 @@ export default function TrendChart() {
       </div>
 
       {/* Summary stats */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:8 }}>
+      <div className="trend-stats-4col" style={{ display:'grid', gap:8 }}>
         {[
           ['Total Events',   earthquakes.length.toString()],
           ['Max Magnitude',  Math.max(...earthquakes.map(e => e.magnitude)).toFixed(1)],
