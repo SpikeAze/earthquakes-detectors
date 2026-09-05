@@ -12,3 +12,4 @@ export default defineConfig({
     allowedHosts: process.env.ALLOWED_HOSTS?.split(',') || [],
   }
 })
+//test
