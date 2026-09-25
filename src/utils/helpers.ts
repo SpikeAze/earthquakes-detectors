@@ -128,6 +128,22 @@ export function getDepthLabel(km: number): string {
   return 'Deep';
 }
 
+// ─── External URL validation ────────────────────────────────────────────────
+// Event URLs come from the USGS API response. Validate the scheme + host
+// before rendering them as links so a compromised/malicious payload can
+// never turn into a `javascript:` / `data:` / phishing href.
+export function safeUsgsUrl(url: unknown): string | null {
+  if (typeof url !== 'string' || url.length > 2048) return null;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:') return null;
+    if (u.hostname !== 'usgs.gov' && !u.hostname.endsWith('.usgs.gov')) return null;
+    return u.href;
+  } catch {
+    return null;
+  }
+}
+
 // ─── CSV sanitization ────────────────────────────────────────────────────────
 const FORMULA_CHARS = ['=', '+', '-', '@', '\t', '\r', '\n'];
 
@@ -141,6 +157,13 @@ function sanitizeCsvField(field: string | number): string {
 }
 
 // ─── CSV export ─────────────────────────────────────────────────────────────
+function toCsvCell(value: string | number): string {
+  const str = sanitizeCsvField(value);
+  // Quote fields containing delimiters/quotes/line-breaks (RFC 4180) so a
+  // place name like "10 km SSW of Town, Region" can't shift columns.
+  return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
 export function exportToCSV(earthquakes: ProcessedEarthquake[]): void {
   const headers = [
     'ID', 'Title', 'Magnitude', 'Category', 'Place',
@@ -163,7 +186,7 @@ export function exportToCSV(earthquakes: ProcessedEarthquake[]): void {
     eq.tsunami ? 'Yes' : 'No',
     sanitizeCsvField(eq.url),
   ]);
-  const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
+  const csv = [headers, ...rows].map((r) => r.map(toCsvCell).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

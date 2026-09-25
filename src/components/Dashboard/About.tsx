@@ -49,6 +49,11 @@ export default function About() {
           </p>
         </div>
       </div>
+      <p className="ss-meta" style={{ margin: '14px 0 0', fontSize: '0.78rem', lineHeight: 1.6, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+        Privacy: SeismoScope stores nothing — no accounts, cookies, or tracking. The only data that leaves your browser is
+        the earthquake catalog request (USGS), map tiles (Esri), fonts (Google Fonts), and any location search you type,
+        which is sent to OpenStreetMap Nominatim solely to resolve coordinates.
+      </p>
     </section>
   );
 }

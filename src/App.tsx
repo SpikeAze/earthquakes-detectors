@@ -13,7 +13,7 @@ import About from './components/Dashboard/About';
 import Footer from './components/Dashboard/Footer';
 import FilterPanel from './components/Filters/FilterPanel';
 import TrendChart from './components/Charts/TrendChart';
-import { getMagnitudeColor } from './utils/helpers';
+import { getMagnitudeColor, safeUsgsUrl } from './utils/helpers';
 import { Activity, Gauge, RadioTower, Clock, X, Rows3, Table2 } from 'lucide-react';
 
 const EarthquakeMap = lazy(() => import('./components/Map/EarthquakeMap'));
@@ -39,6 +39,7 @@ function DenseTable() {
         <tbody>
           {earthquakes.map((eq) => {
             const color = getMagnitudeColor(eq.magnitude);
+            const usgs = safeUsgsUrl(eq.url);
             return (
               <tr key={eq.id} onClick={() => setSelected(eq)} style={{ cursor: 'pointer', background: 'rgba(148,163,184,0.04)' }} tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter') setSelected(eq); }}>
@@ -53,7 +54,11 @@ function DenseTable() {
                 </td>
                 <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{eq.felt ?? '—'}</td>
                 <td style={{ padding: '8px 10px', borderRadius: '0 8px 8px 0' }}>
-                  <a href={eq.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: '0.74rem' }}>USGS ↗</a>
+                  {usgs ? (
+                    <a href={usgs} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: '0.74rem' }}>USGS ↗</a>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>—</span>
+                  )}
                 </td>
               </tr>
             );

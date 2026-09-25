@@ -44,8 +44,9 @@ export async function geocodeCity(
     `https://nominatim.openstreetmap.org/search?${params.toString()}`,
     {
       headers: {
+        // Note: browsers forbid overriding `User-Agent`; it is intentionally
+        // omitted (fetch silently strips it). Accept-Language is allowed.
         'Accept-Language': 'en',
-        'User-Agent': 'SeismoScope/1.0 (earthquake monitoring app)',
       },
     },
   );

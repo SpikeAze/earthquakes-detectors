@@ -5,7 +5,7 @@ import {
 import { useEarthquakeStore } from '../../store/earthquakeStore';
 import type { ProcessedEarthquake } from '../../types/earthquake';
 import {
-  getMagnitudeColor, getMarkerSize, formatTimeAgo,
+  getMagnitudeColor, getMarkerSize, formatTimeAgo, safeUsgsUrl,
 } from '../../utils/helpers';
 import { Waves, ExternalLink } from 'lucide-react';
 
@@ -274,6 +274,7 @@ function ClusterTip({ count, maxMag }: { count: number; maxMag: number }) {
 }
 
 function PopupBody({ eq, color, onDetails }: { eq: ProcessedEarthquake; color: string; onDetails: () => void }) {
+  const usgsUrl = safeUsgsUrl(eq.url);
   return (
     <div style={{ padding: '13px 14px', minWidth: 240 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -305,7 +306,7 @@ function PopupBody({ eq, color, onDetails }: { eq: ProcessedEarthquake; color: s
         <button onClick={onDetails} className="btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: '0.76rem', padding: '7px' }}>
           Full Details
         </button>
-        <a href={eq.url} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ fontSize: '0.76rem', textDecoration: 'none' }}>
+        <a href={usgsUrl ?? undefined} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ fontSize: '0.76rem', textDecoration: 'none', ...(usgsUrl ? {} : { opacity: 0.45, pointerEvents: 'none' }) }} aria-disabled={!usgsUrl}>
           <ExternalLink size={12} aria-hidden="true" /> USGS
         </a>
       </div>

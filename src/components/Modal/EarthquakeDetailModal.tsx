@@ -5,6 +5,7 @@ import {
   formatTimeAgo,
   getDepthLabel,
   getMagnitudeColor,
+  safeUsgsUrl,
   exportToCSV,
 } from '../../utils/helpers';
 import {
@@ -19,6 +20,7 @@ export default function EarthquakeDetailModal() {
   if (!eq) return null;
 
   const color = getMagnitudeColor(eq.magnitude);
+  const usgsUrl = safeUsgsUrl(eq.url);
 
   return (
     <div
@@ -152,13 +154,15 @@ export default function EarthquakeDetailModal() {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 8 }}>
-            <a
-              href={eq.url} target="_blank" rel="noopener noreferrer"
-              className="btn-primary"
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none', fontSize: '0.82rem' }}
-            >
-              <ExternalLink size={14} /> View on USGS
-            </a>
+            {usgsUrl && (
+              <a
+                href={usgsUrl} target="_blank" rel="noopener noreferrer"
+                className="btn-primary"
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none', fontSize: '0.82rem' }}
+              >
+                <ExternalLink size={14} /> View on USGS
+              </a>
+            )}
             <button
               onClick={() => exportToCSV([eq])}
               className="btn-ghost"

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useEarthquakeStore } from '../../store/earthquakeStore';
 import {
   formatDateTimeISO, formatLocalDateTime, formatTimeAgo,
-  getDepthLabel, getMagnitudeColor,
+  getDepthLabel, getMagnitudeColor, safeUsgsUrl,
 } from '../../utils/helpers';
 import { X, ExternalLink, MapPin, Copy, Check, Activity } from 'lucide-react';
 import { useState } from 'react';
@@ -23,6 +23,7 @@ export default function EarthquakeDetails() {
 
   if (!eq) return null;
   const color = getMagnitudeColor(eq.magnitude);
+  const usgsUrl = safeUsgsUrl(eq.url);
 
   const copyCoords = async () => {
     const text = `${eq.latitude.toFixed(4)}, ${eq.longitude.toFixed(4)}`;
@@ -139,12 +140,14 @@ export default function EarthquakeDetails() {
             </button>
           </div>
 
-          <a
-            href={eq.url} target="_blank" rel="noopener noreferrer"
-            className="btn-ghost" style={{ justifyContent: 'center', textDecoration: 'none' }}
-          >
-            <ExternalLink size={14} aria-hidden="true" /> Open authoritative USGS event page
-          </a>
+          {usgsUrl && (
+            <a
+              href={usgsUrl} target="_blank" rel="noopener noreferrer"
+              className="btn-ghost" style={{ justifyContent: 'center', textDecoration: 'none' }}
+            >
+              <ExternalLink size={14} aria-hidden="true" /> Open authoritative USGS event page
+            </a>
+          )}
           <p className="ss-meta" style={{ margin: 0 }}>
             Source: USGS Earthquake Hazards Program. Coordinates and magnitude are reviewed automatically and may be updated.
           </p>
