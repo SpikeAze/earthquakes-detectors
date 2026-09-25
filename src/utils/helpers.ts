@@ -73,6 +73,8 @@ export function processFeature(
       searchLat !== undefined && searchLng !== undefined
         ? haversineKm(searchLat, searchLng, lat, lng)
         : undefined,
+    network: properties.net ?? null,
+    stationCount: properties.nst ?? null,
   };
 }
 

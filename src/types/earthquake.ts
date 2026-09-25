@@ -73,6 +73,8 @@ export interface ProcessedEarthquake {
   title: string;
   category: MagnitudeCategory;
   distanceKm?: number;
+  network: string | null;
+  stationCount: number | null;
 }
 
 export type MagnitudeCategory =

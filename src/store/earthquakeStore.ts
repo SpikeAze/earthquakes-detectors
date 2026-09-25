@@ -9,6 +9,14 @@ interface Toast {
   type: 'info' | 'success' | 'warning' | 'error';
 }
 
+export type FeedSort = 'newest' | 'strongest' | 'nearest';
+
+interface MapFocus {
+  latitude: number;
+  longitude: number;
+  nonce: number;
+}
+
 interface EarthquakeStore {
   earthquakes: ProcessedEarthquake[];
   selectedEarthquake: ProcessedEarthquake | null;
@@ -24,6 +32,9 @@ interface EarthquakeStore {
   filterPanelOpen: boolean;
   toasts: Toast[];
   alertThreshold: number;
+  autoRefresh: boolean;
+  feedSort: FeedSort;
+  mapFocus: MapFocus | null;
 
   setFilters: (filters: Partial<FilterState>) => void;
   setLocation: (location: Partial<LocationState>) => void;
@@ -34,6 +45,9 @@ interface EarthquakeStore {
   toggleFilterPanel: () => void;
   fetchData: () => Promise<void>;
   setAlertThreshold: (v: number) => void;
+  setAutoRefresh: (v: boolean) => void;
+  setFeedSort: (v: FeedSort) => void;
+  focusOnMap: (latitude: number, longitude: number) => void;
   addToast: (message: string, type: Toast['type']) => void;
   removeToast: (id: string) => void;
   resetLocation: () => void;
@@ -72,6 +86,9 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
   filterPanelOpen: false,
   toasts: [],
   alertThreshold: 5.0,
+  autoRefresh: true,
+  feedSort: 'newest',
+  mapFocus: null,
 
   setFilters: (filters) =>
     set((state) => ({ filters: { ...state.filters, ...filters } })),
@@ -94,6 +111,13 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
     set((state) => ({ filterPanelOpen: !state.filterPanelOpen, feedOpen: state.filterPanelOpen ? state.feedOpen : false })),
 
   setAlertThreshold: (v) => set({ alertThreshold: v }),
+
+  setAutoRefresh: (v) => set({ autoRefresh: v }),
+
+  setFeedSort: (v) => set({ feedSort: v }),
+
+  focusOnMap: (latitude, longitude) =>
+    set({ mapFocus: { latitude, longitude, nonce: Date.now() } }),
 
   addToast: (message, type) => {
     const id = Date.now().toString();
