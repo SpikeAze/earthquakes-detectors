@@ -155,8 +155,14 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
 
       set({ earthquakes: processed, totalCount: response.metadata.count, lastUpdated: Date.now(), isLoading: false });
     } catch (err) {
+      // Security: sanitize error messages — don't leak internal details
       const message = err instanceof Error ? err.message : 'Unknown error';
-      set({ error: message, isLoading: false });
+      const sanitized = message.includes('USGS API error')
+        ? 'Failed to load earthquake data. Please try again.'
+        : message.includes('fetch')
+        ? 'Network error. Check your connection and try again.'
+        : 'An unexpected error occurred. Please try again.';
+      set({ error: sanitized, isLoading: false });
     }
   },
 }));

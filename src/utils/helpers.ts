@@ -145,12 +145,18 @@ export function safeUsgsUrl(url: unknown): string | null {
 }
 
 // ─── CSV sanitization ────────────────────────────────────────────────────────
-const FORMULA_CHARS = ['=', '+', '-', '@', '\t', '\r', '\n'];
+// Formula injection characters: = + - @ | tab CR LF and Unicode equivalents
+// Also block leading spaces and single quotes (which can be used to escape)
+const FORMULA_CHARS = ['=', '+', '-', '@', '|', '\t', '\r', '\n', '\uFF1D', '\uFF0B', '\u2212', '\uFF20']; // = + - @ | and fullwidth variants
 
 function sanitizeCsvField(field: string | number): string {
   const str = String(field);
   // Prefix with a single quote to neutralize formula injection attempts
-  if (FORMULA_CHARS.some((c) => str.startsWith(c))) {
+  // Also handle leading spaces which can be used to bypass some filters
+  const trimmedStart = str.replace(/^\s+/, '');
+  const hasLeadingSpace = str.length !== trimmedStart.length;
+  const dangerousStart = FORMULA_CHARS.some((c) => trimmedStart.startsWith(c));
+  if (dangerousStart || hasLeadingSpace || trimmedStart.startsWith("'")) {
     return `'${str}`;
   }
   return str;
@@ -161,7 +167,7 @@ function toCsvCell(value: string | number): string {
   const str = sanitizeCsvField(value);
   // Quote fields containing delimiters/quotes/line-breaks (RFC 4180) so a
   // place name like "10 km SSW of Town, Region" can't shift columns.
-  return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  return /[\",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
 }
 
 export function exportToCSV(earthquakes: ProcessedEarthquake[]): void {

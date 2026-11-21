@@ -26,7 +26,14 @@ export default function FilterPanel() {
     return () => { if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current); };
   }, []);
 
+  const MAX_GEOCODE_QUERY_LEN = 100;
+
   const performGeocode = async (query: string) => {
+    // Security: limit query length to prevent Nominatim DoS
+    if (query.length > MAX_GEOCODE_QUERY_LEN) {
+      addToast(`Query too long (max ${MAX_GEOCODE_QUERY_LEN} chars).`, 'error');
+      return;
+    }
     setGeocoding(true);
     try {
       const result = await geocodeCity(query);

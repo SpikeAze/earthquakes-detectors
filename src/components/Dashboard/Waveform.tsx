@@ -13,7 +13,7 @@ import { Activity } from 'lucide-react';
 export default function Waveform() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const strongest = useEarthquakeStore((s) =>
-    s.earthquakes.length ? [...s.earthquakes].sort((a, b) => b.magnitude - a.magnitude)[0] : null,
+    s.earthquakes.length ? s.earthquakes.toSorted((a, b) => b.magnitude - a.magnitude)[0] : null,
   );
   const lastUpdated = useEarthquakeStore((s) => s.lastUpdated);
 

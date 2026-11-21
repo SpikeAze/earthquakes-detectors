@@ -84,10 +84,35 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
+  // Exponential backoff + jitter for auto-refresh to prevent thundering herd
   useEffect(() => {
     if (!autoRefresh) return;
-    const id = setInterval(() => { fetchData(); }, 5 * 60 * 1000);
-    return () => clearInterval(id);
+
+    const BASE_INTERVAL = 5 * 60 * 1000; // 5 minutes base
+    const MAX_INTERVAL = 15 * 60 * 1000; // 15 minutes max
+    let currentInterval = BASE_INTERVAL;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+      // Add jitter: ±25% of current interval
+      const jitter = currentInterval * 0.25 * (Math.random() * 2 - 1);
+      const delay = Math.min(Math.max(BASE_INTERVAL, currentInterval + jitter), MAX_INTERVAL);
+
+      timeoutId = setTimeout(async () => {
+        try {
+          await fetchData();
+          // Success: reset to base interval
+          currentInterval = BASE_INTERVAL;
+        } catch {
+          // Failure: exponential backoff (capped at MAX_INTERVAL)
+          currentInterval = Math.min(currentInterval * 2, MAX_INTERVAL);
+        }
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
+    return () => clearTimeout(timeoutId);
   }, [fetchData, autoRefresh]);
 
   useEffect(() => {
@@ -99,7 +124,7 @@ export default function App() {
 
   const stats = useMemo(() => {
     if (earthquakes.length === 0) return null;
-    const sorted = [...earthquakes].sort((a, b) => b.magnitude - a.magnitude);
+    const sorted = earthquakes.toSorted((a, b) => b.magnitude - a.magnitude);
     const strongest = sorted[0];
     const networks = new Set(earthquakes.map((e) => e.network).filter(Boolean)).size;
     const maxStations = Math.max(...earthquakes.map((e) => e.stationCount ?? 0));
