@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 
 // Security: validate ALLOWED_HOSTS — reject wildcards, empty, overly broad entries
 function getAllowedHosts(): string[] {
@@ -30,7 +29,6 @@ function securityHeadersPlugin() {
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),
     securityHeadersPlugin(),
   ],
   server: {

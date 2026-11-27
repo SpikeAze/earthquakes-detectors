@@ -71,6 +71,16 @@ const defaultLocation: LocationState = {
   radiusKm: 1000,
 };
 
+// Generate cryptographically secure unique IDs for toasts
+function generateToastId(): string {
+  // crypto.randomUUID() is available in all modern browsers
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older environments
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
   earthquakes: [],
   selectedEarthquake: null,
@@ -120,7 +130,7 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
     set({ mapFocus: { latitude, longitude, nonce: Date.now() } }),
 
   addToast: (message, type) => {
-    const id = Date.now().toString();
+    const id = generateToastId();
     set((state) => ({ toasts: [...state.toasts, { id, message, type }] }));
     setTimeout(() => get().removeToast(id), 4000);
   },
@@ -155,13 +165,18 @@ export const useEarthquakeStore = create<EarthquakeStore>((set, get) => ({
 
       set({ earthquakes: processed, totalCount: response.metadata.count, lastUpdated: Date.now(), isLoading: false });
     } catch (err) {
+      // Ignore AbortError from request deduplication (not a real error)
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        set({ isLoading: false });
+        return;
+      }
       // Security: sanitize error messages — don't leak internal details
       const message = err instanceof Error ? err.message : 'Unknown error';
       const sanitized = message.includes('USGS API error')
         ? 'Failed to load earthquake data. Please try again.'
         : message.includes('fetch')
-        ? 'Network error. Check your connection and try again.'
-        : 'An unexpected error occurred. Please try again.';
+          ? 'Network error. Check your connection and try again.'
+          : 'An unexpected error occurred. Please try again.';
       set({ error: sanitized, isLoading: false });
     }
   },

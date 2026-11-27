@@ -4,7 +4,7 @@ import {
   ResponsiveContainer, LineChart, Line, Legend, Cell,
 } from 'recharts';
 import { useEarthquakeStore } from '../../store/earthquakeStore';
-import { getMagnitudeColor } from '../../utils/helpers';
+import { getMagnitudeCssVars } from '../../utils/helpers';
 import { BarChart2, TrendingUp } from 'lucide-react';
 
 export default function TrendChart() {
@@ -52,84 +52,83 @@ export default function TrendChart() {
   }, [earthquakes]);
 
   const tooltipStyle = {
-    backgroundColor: 'var(--bg-card)',
-    border: '1px solid var(--border-glass-hover)',
-    borderRadius: 8,
-    color: 'var(--text-primary)',
-    fontSize: '0.78rem',
+    backgroundColor: 'var(--stratum-2)',
+    border: '1px solid var(--fault-line-strong)',
+    borderRadius: 'var(--radius-panel)',
+    color: 'var(--quartz)',
+    fontSize: 'var(--text-xs)',
+    fontFamily: "'JetBrains Mono', monospace",
   };
 
   if (earthquakes.length === 0) {
     return (
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'var(--text-muted)', fontSize:'0.85rem' }}>
+      <div className="panel" style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'var(--mica)' }}>
         No data to display. Fetch earthquakes first.
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '16px 20px', height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ padding: '16px 20px', height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Daily frequency chart */}
-      <div className="glass-card-solid" style={{ padding: '16px', borderRadius: 12 }}>
+      <div className="panel-elevated" style={{ padding: '16px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
-          <BarChart2 size={15} style={{ color:'var(--accent-blue)' }} />
-          <span style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--text-primary)' }}>Daily Earthquake Count</span>
-          <span style={{ marginLeft:'auto', fontSize:'0.72rem', color:'var(--text-muted)' }}>{dailyData.length} days</span>
+          <BarChart2 size={16} style={{ color:'var(--p-wave)' }} />
+          <span style={{ fontWeight:600, fontSize:'var(--text-sm)', color:'var(--quartz)' }}>Daily Earthquake Count</span>
+          <span style={{ marginLeft:'auto', fontSize:'var(--text-xs)', color:'var(--mica)' }}>{dailyData.length} days</span>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={dailyData} margin={{ top: 4, right: 4, left: -10, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="dateShort" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-            <YAxis tick={{ fontSize: 10 }} />
-            <Tooltip
-              contentStyle={tooltipStyle}
-               formatter={(value: unknown, name: string | number | undefined) => [typeof value === 'number' ? value : 0, name === 'count' ? 'Events' : String(name ?? 'Value')]}
-              labelFormatter={(l) => `Date: ${l}`}
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--fault-line)" />
+            <XAxis dataKey="dateShort" tick={{ fontSize: 10, fill: 'var(--mica)', fontFamily: "'JetBrains Mono', monospace" }} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--mica)', fontFamily: "'JetBrains Mono', monospace" }} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(value: unknown, name: string | number | undefined) => [typeof value === 'number' ? value : 0, name === 'count' ? 'Events' : String(name ?? 'Value')]} labelFormatter={(l) => `Date: ${l}`} />
             <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-              {dailyData.map((entry, idx) => (
-                <Cell key={idx} fill={entry.maxMag >= 6 ? '#dc2626' : entry.maxMag >= 5 ? '#f97316' : entry.maxMag >= 4 ? '#eab308' : '#4f8ef7'} />
-              ))}
+              {dailyData.map((entry, idx) => {
+                const cssVars = getMagnitudeCssVars(entry.maxMag);
+                return <Cell key={idx} fill={`var(--eq-color)`} style={cssVars} />;
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Max magnitude trend */}
-      <div className="glass-card-solid" style={{ padding: '16px', borderRadius: 12 }}>
+      <div className="panel-elevated" style={{ padding: '16px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
-          <TrendingUp size={15} style={{ color:'var(--accent-blue)' }} />
-          <span style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--text-primary)' }}>Daily Max & Avg Magnitude</span>
+          <TrendingUp size={16} style={{ color:'var(--s-wave)' }} />
+          <span style={{ fontWeight:600, fontSize:'var(--text-sm)', color:'var(--quartz)' }}>Daily Max & Avg Magnitude</span>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={dailyData} margin={{ top: 4, right: 4, left: -10, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="dateShort" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-            <YAxis tick={{ fontSize: 10 }} domain={[0, 'auto']} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--fault-line)" />
+            <XAxis dataKey="dateShort" tick={{ fontSize: 10, fill: 'var(--mica)', fontFamily: "'JetBrains Mono', monospace" }} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--mica)', fontFamily: "'JetBrains Mono', monospace" }} domain={[0, 'auto']} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v: unknown) => (typeof v === 'number' ? v : 0).toFixed(2)} />
-            <Legend wrapperStyle={{ fontSize: '0.72rem' }} />
-            <Line type="monotone" dataKey="maxMag" stroke="#ef4444" strokeWidth={2} dot={false} name="Max Mag" />
-            <Line type="monotone" dataKey="avgMag" stroke="#4f8ef7" strokeWidth={2} dot={false} name="Avg Mag" strokeDasharray="4 2" />
+            <Legend wrapperStyle={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', fontFamily: "'Space Grotesk', sans-serif" }} />
+            <Line type="monotone" dataKey="maxMag" stroke="var(--s-wave)" strokeWidth={2} dot={false} name="Max Mag" />
+            <Line type="monotone" dataKey="avgMag" stroke="var(--p-wave)" strokeWidth={2} dot={false} name="Avg Mag" strokeDasharray="4 2" />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* Magnitude distribution */}
-      <div className="glass-card-solid" style={{ padding: '16px', borderRadius: 12 }}>
+      <div className="panel-elevated" style={{ padding: '16px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
-          <BarChart2 size={15} style={{ color:'var(--accent-blue)' }} />
-          <span style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--text-primary)' }}>Magnitude Distribution</span>
+          <BarChart2 size={16} style={{ color:'var(--surface-wave)' }} />
+          <span style={{ fontWeight:600, fontSize:'var(--text-sm)', color:'var(--quartz)' }}>Magnitude Distribution</span>
         </div>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={magDistribution} margin={{ top: 4, right: 4, left: -10, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="range" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--fault-line)" />
+            <XAxis dataKey="range" tick={{ fontSize: 10, fill: 'var(--mica)', fontFamily: "'JetBrains Mono', monospace" }} />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--mica)', fontFamily: "'JetBrains Mono', monospace" }} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v: unknown) => [typeof v === 'number' ? v : 0, 'Events']} />
             <Bar dataKey="count" radius={[3, 3, 0, 0]}>
               {magDistribution.map((_, idx) => {
                 const mids = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5];
-                return <Cell key={idx} fill={getMagnitudeColor(mids[idx] ?? 0)} />;
+                const cssVars = getMagnitudeCssVars(mids[idx] ?? 0);
+                return <Cell key={idx} fill={`var(--eq-color)`} style={cssVars} />;
               })}
             </Bar>
           </BarChart>
@@ -137,16 +136,16 @@ export default function TrendChart() {
       </div>
 
       {/* Summary stats */}
-      <div className="trend-stats-4col" style={{ display:'grid', gap:8 }}>
+      <div style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
         {[
           ['Total Events',   earthquakes.length.toString()],
           ['Max Magnitude',  Math.max(...earthquakes.map(e => e.magnitude)).toFixed(1)],
           ['Avg Magnitude',  (earthquakes.reduce((s,e)=>s+e.magnitude,0)/earthquakes.length).toFixed(2)],
           ['With Tsunami',   earthquakes.filter(e=>e.tsunami).length.toString()],
         ].map(([label, val]) => (
-          <div key={label} style={{ background:'rgba(255,255,255,0.03)', border:'1px solid var(--border-glass)', borderRadius:10, padding:'10px 12px', textAlign:'center' }}>
-            <div style={{ fontFamily:"'JetBrains Mono', monospace", fontWeight:700, fontSize:'1.1rem', color:'var(--text-primary)' }}>{val}</div>
-            <div style={{ fontSize:'0.65rem', color:'var(--text-muted)', marginTop:3 }}>{label}</div>
+          <div key={label} className="panel" style={{ padding: '14px 12px', textAlign: 'center' }}>
+            <div className="mono" style={{ fontSize: 'var(--text-xl)', fontWeight: 600, color: 'var(--quartz)' }}>{val}</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', marginTop: 4, textTransform: 'uppercase', letterSpacing: 'var(--tracking-wider)' }}>{label}</div>
           </div>
         ))}
       </div>

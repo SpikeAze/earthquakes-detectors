@@ -2,23 +2,23 @@ import { X, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { useEarthquakeStore } from '../../store/earthquakeStore';
 
 export default function ToastContainer() {
-  const toasts      = useEarthquakeStore((s) => s.toasts);
+  const toasts = useEarthquakeStore((s) => s.toasts);
   const removeToast = useEarthquakeStore((s) => s.removeToast);
 
   if (toasts.length === 0) return null;
 
   const icons = {
-    info:    <Info size={14} style={{ color: '#60a5fa' }} />,
-    success: <CheckCircle size={14} style={{ color: '#4ade80' }} />,
-    warning: <AlertTriangle size={14} style={{ color: '#fbbf24' }} />,
-    error:   <XCircle size={14} style={{ color: '#f87171' }} />,
+    info: <Info size={14} style={{ color: 'var(--p-wave)' }} />,
+    success: <CheckCircle size={14} style={{ color: 'var(--mag-2)' }} />,
+    warning: <AlertTriangle size={14} style={{ color: 'var(--mag-4)' }} />,
+    error: <XCircle size={14} style={{ color: 'var(--mag-6)' }} />,
   };
 
-  const borders: Record<string, string> = {
-    info:    'rgba(96,165,250,0.35)',
-    success: 'rgba(74,222,128,0.35)',
-    warning: 'rgba(251,191,36,0.35)',
-    error:   'rgba(248,113,113,0.35)',
+  const borderColors = {
+    info: 'var(--p-wave)',
+    success: 'var(--mag-2)',
+    warning: 'var(--mag-4)',
+    error: 'var(--mag-6)',
   };
 
   return (
@@ -32,23 +32,22 @@ export default function ToastContainer() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="toast glass-card"
+          className="toast panel-elevated"
           style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 14px',
-            border: `1px solid ${borders[toast.type]}`,
+            borderLeft: `4px solid ${borderColors[toast.type]}`,
             minWidth: 260, maxWidth: 380,
             pointerEvents: 'auto',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
           }}
         >
           {icons[toast.type]}
-          <span style={{ flex: 1, fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
+          <span style={{ flex: 1, fontSize: 'var(--text-sm)', color: 'var(--quartz)', lineHeight: 1.4 }}>
             {toast.message}
           </span>
           <button
             onClick={() => removeToast(toast.id)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 0 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mica)', display: 'flex', padding: 0 }}
           >
             <X size={13} />
           </button>

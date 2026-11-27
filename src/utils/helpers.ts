@@ -40,6 +40,44 @@ export function getMarkerSize(mag: number): number {
   return 58;
 }
 
+// ─── Color utilities for safe CSS custom property injection ───────────────────
+// Convert hex color to RGB object for use with CSS custom properties + alpha
+export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const clean = hex.replace('#', '');
+  if (clean.length !== 6) return null;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+  return { r, g, b };
+}
+
+// CSS custom properties type - allows arbitrary CSS variable names
+type CssVars = Record<string, string>;
+
+// Generate CSS custom properties for a magnitude color with alpha variants
+// Returns an object suitable for spreading into React style prop
+export function getMagnitudeCssVars(mag: number): CssVars {
+  const hex = getMagnitudeColor(mag);
+  const rgb = hexToRgb(hex);
+  if (!rgb) return {};
+  const { r, g, b } = rgb;
+  return {
+    '--eq-r': String(r),
+    '--eq-g': String(g),
+    '--eq-b': String(b),
+    // Pre-computed rgba strings for common alpha values
+    '--eq-color': `rgb(${r}, ${g}, ${b})`,
+    '--eq-color-10': `rgba(${r}, ${g}, ${b}, 0.1)`,
+    '--eq-color-1f': `rgba(${r}, ${g}, ${b}, 0.12)`,
+    '--eq-color-22': `rgba(${r}, ${g}, ${b}, 0.13)`,
+    '--eq-color-33': `rgba(${r}, ${g}, ${b}, 0.2)`,
+    '--eq-color-44': `rgba(${r}, ${g}, ${b}, 0.27)`,
+    '--eq-color-55': `rgba(${r}, ${g}, ${b}, 0.33)`,
+    '--eq-color-dd': `rgba(${r}, ${g}, ${b}, 0.87)`,
+  };
+}
+
 // ─── Feature → ProcessedEarthquake ──────────────────────────────────────────
 export function processFeature(
   feature: EarthquakeFeature,
@@ -145,29 +183,22 @@ export function safeUsgsUrl(url: unknown): string | null {
 }
 
 // ─── CSV sanitization ────────────────────────────────────────────────────────
-// Formula injection characters: = + - @ | tab CR LF and Unicode equivalents
-// Also block leading spaces and single quotes (which can be used to escape)
-const FORMULA_CHARS = ['=', '+', '-', '@', '|', '\t', '\r', '\n', '\uFF1D', '\uFF0B', '\u2212', '\uFF20']; // = + - @ | and fullwidth variants
-
+// Formula injection prevention: prefix all fields with a single quote (')
+// This neutralizes formulas in Excel, Google Sheets, LibreOffice, and other
+// spreadsheet applications. Also RFC 4180 compliant quoting for delimiters.
 function sanitizeCsvField(field: string | number): string {
   const str = String(field);
-  // Prefix with a single quote to neutralize formula injection attempts
-  // Also handle leading spaces which can be used to bypass some filters
-  const trimmedStart = str.replace(/^\s+/, '');
-  const hasLeadingSpace = str.length !== trimmedStart.length;
-  const dangerousStart = FORMULA_CHARS.some((c) => trimmedStart.startsWith(c));
-  if (dangerousStart || hasLeadingSpace || trimmedStart.startsWith("'")) {
-    return `'${str}`;
-  }
-  return str;
+  // Always prefix with single quote to neutralize formula injection
+  // This is the most reliable cross-application defense
+  return `'${str}`;
 }
 
 // ─── CSV export ─────────────────────────────────────────────────────────────
 function toCsvCell(value: string | number): string {
   const str = sanitizeCsvField(value);
-  // Quote fields containing delimiters/quotes/line-breaks (RFC 4180) so a
-  // place name like "10 km SSW of Town, Region" can't shift columns.
-  return /[\",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  // RFC 4180: quote fields containing delimiters, quotes, or line breaks
+  // Since we prefix with ', we only need to escape embedded quotes
+  return /[,"\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
 }
 
 export function exportToCSV(earthquakes: ProcessedEarthquake[]): void {

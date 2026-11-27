@@ -29,7 +29,6 @@ export default function FilterPanel() {
   const MAX_GEOCODE_QUERY_LEN = 100;
 
   const performGeocode = async (query: string) => {
-    // Security: limit query length to prevent Nominatim DoS
     if (query.length > MAX_GEOCODE_QUERY_LEN) {
       addToast(`Query too long (max ${MAX_GEOCODE_QUERY_LEN} chars).`, 'error');
       return;
@@ -76,17 +75,17 @@ export default function FilterPanel() {
   ];
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 14, overflowY: 'auto', height: '100%' }}>
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Sliders size={15} style={{ color: 'var(--accent)' }} aria-hidden="true" />
-        <h2 style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem' }}>Advanced filters</h2>
-        <button onClick={handleReset} className="btn-icon" style={{ marginLeft: 'auto', padding: 5 }} title="Reset all filters" aria-label="Reset all filters">
+        <Sliders size={15} style={{ color: 'var(--p-wave)' }} aria-hidden="true" />
+        <h2 style={{ margin: 0, fontWeight: 600, fontSize: 'var(--text-base)', color: 'var(--quartz)' }}>Advanced filters</h2>
+        <button onClick={handleReset} className="btn btn-icon" style={{ marginLeft: 'auto', padding: 5 }} title="Reset all filters" aria-label="Reset all filters">
           <RotateCcw size={13} />
         </button>
       </div>
 
       <div>
-        <Label>Quick presets</Label>
+        <div className="uppercase-tracked" style={{ marginBottom: 8 }}>Quick presets</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {presets.map((p) => (
             <button key={p.label} onClick={p.action} className="chip">
@@ -96,42 +95,42 @@ export default function FilterPanel() {
         </div>
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
       <div>
-        <Label>Location search</Label>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        <div className="uppercase-tracked" style={{ marginBottom: 8 }}>Location search</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
           <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} aria-hidden="true" />
+            <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--mica)' }} aria-hidden="true" />
             <input
               type="text"
               value={cityQuery}
               onChange={(e) => setCityQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleGeocode()}
               placeholder="City, country, or region…"
-              className="glass-input"
-              style={{ paddingLeft: 28 }}
+              className="input"
+              style={{ paddingLeft: 32 }}
               aria-label="Search for a city or region"
             />
           </div>
-          <button onClick={handleGeocode} disabled={geocoding} className="btn-primary" style={{ padding: '8px 12px' }} aria-label="Search location">
+          <button onClick={handleGeocode} disabled={geocoding} className="btn btn-primary" style={{ padding: '8px 12px' }} aria-label="Search location">
             {geocoding ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={14} />}
           </button>
         </div>
         {location.name && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 9px', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 8, fontSize: '0.74rem', color: 'var(--accent)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--p-wave-dim)', border: '1px solid var(--p-wave)', borderRadius: 'var(--radius-instrument)', fontSize: 'var(--text-xs)', color: 'var(--p-wave)' }}>
             <MapPin size={11} style={{ flexShrink: 0 }} aria-hidden="true" />
             <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {location.name.split(',').slice(0, 2).join(',')}
             </span>
-            <button onClick={() => { resetLocation(); setCityQuery(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }} aria-label="Clear location">
+            <button onClick={() => { resetLocation(); setCityQuery(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mica)', display: 'flex' }} aria-label="Clear location">
               <X size={12} />
             </button>
           </div>
         )}
         {location.latitude !== null && (
           <div style={{ marginTop: 8 }}>
-            <Label>Radius: {location.radiusKm} km</Label>
+            <div className="uppercase-tracked" style={{ marginBottom: 6 }}>Radius: {location.radiusKm} km</div>
             <input
               type="range" min={100} max={5000} step={100}
               value={location.radiusKm}
@@ -142,39 +141,39 @@ export default function FilterPanel() {
         )}
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
       <div>
-        <Label>Date range</Label>
+        <div className="uppercase-tracked" style={{ marginBottom: 8 }}>Date range</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: 3 }}>Start</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', marginBottom: 3 }}>Start</div>
             <input
               type="date" value={dateForInput(filters.startDate)}
               onChange={(e) => setFilters({ startDate: e.target.value })}
-              className="glass-input" style={{ colorScheme: 'dark', fontSize: '0.8rem' }}
+              className="input" style={{ fontSize: 'var(--text-sm)' }}
               aria-label="Start date"
             />
           </div>
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: 3 }}>End</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', marginBottom: 3 }}>End</div>
             <input
               type="date" value={dateForInput(filters.endDate)}
               onChange={(e) => setFilters({ endDate: e.target.value })}
-              className="glass-input" style={{ colorScheme: 'dark', fontSize: '0.8rem' }}
+              className="input" style={{ fontSize: 'var(--text-sm)' }}
               aria-label="End date"
             />
           </div>
         </div>
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
       <div>
-        <Label>Magnitude: {filters.minMagnitude.toFixed(1)} – {filters.maxMagnitude.toFixed(1)}</Label>
+        <div className="uppercase-tracked" style={{ marginBottom: 8 }}>Magnitude: {filters.minMagnitude.toFixed(1)} – {filters.maxMagnitude.toFixed(1)}</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: 3 }}>Min</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', marginBottom: 3 }}>Min</div>
             <input type="range" min={0} max={9} step={0.1} value={filters.minMagnitude} aria-label="Minimum magnitude"
               onChange={(e) => {
                 const val = Number(e.target.value);
@@ -182,7 +181,7 @@ export default function FilterPanel() {
               }} />
           </div>
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: 3 }}>Max</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', marginBottom: 3 }}>Max</div>
             <input type="range" min={1} max={10} step={0.1} value={filters.maxMagnitude} aria-label="Maximum magnitude"
               onChange={(e) => {
                 const val = Number(e.target.value);
@@ -192,10 +191,10 @@ export default function FilterPanel() {
         </div>
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
       <div>
-        <Label>Depth: {filters.minDepth} – {filters.maxDepth} km</Label>
+        <div className="uppercase-tracked" style={{ marginBottom: 8 }}>Depth: {filters.minDepth} – {filters.maxDepth} km</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
           {[
             { l: 'Any', a: 0, b: 700 },
@@ -217,13 +216,13 @@ export default function FilterPanel() {
         </div>
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <div>
-          <Label>Sort by</Label>
+          <div className="uppercase-tracked" style={{ marginBottom: 6 }}>Sort by</div>
           <select value={filters.orderBy} onChange={(e) => setFilters({ orderBy: e.target.value as FilterState['orderBy'] })}
-            className="glass-input" style={{ colorScheme: 'dark' }} aria-label="Sort order for API query">
+            className="input" style={{ colorScheme: 'dark' }} aria-label="Sort order for API query">
             <option value="time">Newest first</option>
             <option value="time-asc">Oldest first</option>
             <option value="magnitude">Highest magnitude</option>
@@ -231,40 +230,28 @@ export default function FilterPanel() {
           </select>
         </div>
         <div>
-          <Label>Limit: {filters.limit}</Label>
+          <div className="uppercase-tracked" style={{ marginBottom: 6 }}>Limit: {filters.limit}</div>
           <input type="range" min={10} max={500} step={10} value={filters.limit} aria-label="Maximum number of events"
             onChange={(e) => setFilters({ limit: Math.max(10, Math.min(500, Number(e.target.value) || 10)) })} />
         </div>
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
       <div>
-        <Label>Alert threshold: M{alertThreshold.toFixed(1)}+</Label>
+        <div className="uppercase-tracked" style={{ marginBottom: 6 }}>Alert threshold: M{alertThreshold.toFixed(1)}+</div>
         <input type="range" min={1} max={9} step={0.5} value={alertThreshold} aria-label="Alert threshold magnitude"
           onChange={(e) => setAlertThreshold(Math.max(1, Math.min(9, Number(e.target.value) || 5)))} />
-        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 3 }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--mica)', marginTop: 4 }}>
           Notify when new earthquakes ≥ M{alertThreshold.toFixed(1)} appear
         </div>
       </div>
 
-      <Divider />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--fault-line)', margin: '4px 0' }} aria-hidden="true" />
 
-      <button onClick={() => fetchData()} className="btn-primary" style={{ width: '100%', padding: '10px', justifyContent: 'center' }}>
-        Apply &amp; search
+      <button onClick={() => fetchData()} className="btn btn-primary" style={{ width: '100%', padding: '10px', justifyContent: 'center' }}>
+        Apply & search
       </button>
     </div>
   );
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-      {children}
-    </div>
-  );
-}
-
-function Divider() {
-  return <div style={{ height: 1, background: 'var(--border)' }} aria-hidden="true" />;
 }

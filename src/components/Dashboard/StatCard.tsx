@@ -5,28 +5,33 @@ interface Props {
   value: string;
   sub?: string;
   icon?: ReactNode;
-  accent?: string;
+  accent?: 'p-wave' | 's-wave' | 'surface-wave';
 }
 
-export default function StatCard({ label, value, sub, icon, accent }: Props) {
+const accentMap = {
+  'p-wave': 'var(--p-wave)',
+  's-wave': 'var(--s-wave)',
+  'surface-wave': 'var(--surface-wave)',
+} as const;
+
+export default function StatCard({ label, value, sub, icon, accent = 'p-wave' }: Props) {
+  const accentColor = accentMap[accent];
+
   return (
-    <div
-      className="ss-card ss-card-pad"
-      style={{ minWidth: 0 }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+    <div className="panel" style={{ minWidth: 0, padding: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         {icon && (
-          <span aria-hidden="true" style={{ color: accent ?? 'var(--accent)', display: 'flex' }}>
+          <span aria-hidden="true" style={{ color: accentColor, display: 'flex' }}>
             {icon}
           </span>
         )}
-        <span className="ss-section-label">{label}</span>
+        <span className="uppercase-tracked">{label}</span>
       </div>
-      <div className="ss-mono stat-value">
+      <div className="mono" style={{ fontSize: 'var(--text-2xl)', fontWeight: 600, letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-tight)', color: 'var(--quartz)' }}>
         {value}
       </div>
       {sub && (
-        <div className="ss-meta" style={{ marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ marginTop: 6, fontSize: 'var(--text-sm)', color: 'var(--mica)', lineHeight: 'var(--leading-normal)' }}>
           {sub}
         </div>
       )}

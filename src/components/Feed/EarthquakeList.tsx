@@ -42,7 +42,7 @@ export default function EarthquakeList({ compact = false }: { compact?: boolean 
       <div
         role="group"
         aria-label="Sort earthquakes"
-        style={{ display: 'flex', gap: 6, padding: '12px 12px 8px', flexShrink: 0 }}
+        style={{ display: 'flex', gap: 6, padding: '12px 12px 8px', flexShrink: 0, flexWrap: 'wrap', alignItems: 'center' }}
       >
         {SORTS.map((s) => {
           const disabled = s.key === 'nearest' && !hasDistances && location.latitude === null;
@@ -60,7 +60,7 @@ export default function EarthquakeList({ compact = false }: { compact?: boolean 
             </button>
           );
         })}
-        <span className="ss-meta" style={{ marginLeft: 'auto', alignSelf: 'center' }}>
+        <span style={{ marginLeft: 'auto', fontSize: 'var(--text-xs)', color: 'var(--mica)' }}>
           {sorted.length} events
         </span>
       </div>

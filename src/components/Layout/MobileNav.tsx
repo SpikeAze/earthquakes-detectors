@@ -11,18 +11,20 @@ const ITEMS = [
 /** Thumb-friendly bottom navigation for phones. Labels always accompany icons. */
 export default function MobileNav() {
   return (
-    <nav className="bottom-nav" aria-label="Section navigation">
+    <nav className="bottom-nav" aria-label="Section navigation" style={{ gap: 4 }}>
       {ITEMS.map(({ href, label, Icon }) => (
         <a
           key={href}
           href={href}
           style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-            color: 'var(--text-secondary)', textDecoration: 'none',
-            fontSize: '0.64rem', fontWeight: 700, padding: '6px 2px', borderRadius: 8,
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+            color: 'var(--mica)', textDecoration: 'none',
+            fontSize: 'var(--text-xs)', fontWeight: 600, padding: '8px 4px',
+            borderRadius: 'var(--radius-instrument)',
+            transition: 'color 0.12s ease, background 0.12s ease',
           }}
         >
-          <Icon size={17} aria-hidden="true" />
+          <Icon size={18} aria-hidden="true" />
           {label}
         </a>
       ))}
